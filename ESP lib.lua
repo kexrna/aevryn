@@ -111,9 +111,57 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 		return ins 
 	end
 
+	function ESP:get_category(player)
+		local local_player = players.LocalPlayer
+		if not local_player or not player then
+			return "Enemies"
+		end
+
+		if player == local_player then
+			return "Local"
+		end
+
+		if player.Team and local_player.Team and player.Team == local_player.Team then
+			return "Team"
+		end
+
+		if player.IsFriendsWith and player:IsFriendsWith(local_player.UserId) then
+			return "Team"
+		end
+
+		return "Enemies"
+	end
+
+	function ESP:get_setting(player, flag_name, fallback)
+		local category = ESP:get_category(player)
+		local key = category .. flag_name
+		local value = ESP.flags and ESP.flags[key]
+		if value == nil and ESP.flags then
+			value = ESP.flags[flag_name]
+		end
+		if value ~= nil then
+			return value
+		end
+		return fallback
+	end
+
+	function ESP:get_color(player, flag_name, fallback)
+		local value = ESP:get_setting(player, flag_name, fallback)
+		if type(value) == "table" and value.Color then
+			return value.Color
+		end
+		return value
+	end
+
 	function ESP:create_object( player )
 		ESP[ player.Name ] = { objects = { }, info = {character = character; humanoid = humanoid}; drawings = { }} 
 		local data = ESP[ player.Name ] 
+		local category = ESP:get_category(player)
+		local boxes_enabled = ESP:get_setting(player, "Boxes", true)
+		local box_type = ESP:get_setting(player, "Box_Type", "Corner")
+		local healthbar_enabled = ESP:get_setting(player, "Healthbar", true)
+		local distance_enabled = ESP:get_setting(player, "Distance", true)
+		local weapon_enabled = ESP:get_setting(player, "Weapon", true)
 
 		local objects = data.objects; do
 			objects[ "holder" ] = ESP:create( "Frame" , {
@@ -128,14 +176,14 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 			});
 			
 			objects[ "box_outline" ] = ESP:create( "UIStroke" , {
-				Parent = (ESP.flags["Boxes"] and ESP.flags["Box_Type"] ~= "Corner" and objects["holder"]) or ESP.cache;
+				Parent = (boxes_enabled and box_type ~= "Corner" and objects["holder"]) or ESP.cache;
 				LineJoinMode = Enum.LineJoinMode.Miter
 			});
 			
 			objects[ "name" ] = ESP:create( "TextLabel" , {
 				FontFace = fonts.main;
 				Parent = objects[ "holder" ];
-				TextColor3 = ESP.flags["Name_Color"].Color;
+				TextColor3 = ESP:get_color(player, "Name_Color", rgb(255, 255, 255));
 				BorderColor3 = rgb(0, 0, 0);
 				Text = string.format("%s (@%s)", player.DisplayName, player.Name);
 				Name = "\0";
@@ -150,7 +198,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 			});
 			
 			objects[ "box_handler" ] = ESP:create( "Frame" , {
-				Parent = (ESP.flags["Boxes"] and ESP.flags["Box_Type"] ~= "Corner" and objects["holder"]) or ESP.cache;
+				Parent = (boxes_enabled and box_type ~= "Corner" and objects["holder"]) or ESP.cache;
 				Name = "\0";
 				BackgroundTransparency = 1;
 				Position = dim2(0, 1, 0, 1);
@@ -187,7 +235,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 				objects[ "corners" ] = ESP:create( "Frame" , {
 					Visible = true;
 					BorderColor3 = rgb(0, 0, 0);
-					Parent = ESP.flags["Boxes"] and ESP.flags["Box_Type"] == "Corner" and objects["holder"] or ESP.cache;
+					Parent = boxes_enabled and box_type == "Corner" and objects["holder"] or ESP.cache;
 					BackgroundTransparency = 1;
 					Position = dim2(0, -1, 0, 2);
 					Name = "\0";
@@ -360,7 +408,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 			-- Healthbar
 				objects[ "healthbar_holder" ] = ESP:create( "Frame" , {
 					AnchorPoint = vec2(1, 0);
-					Parent = ESP.flags["Healthbar"] and objects[ "holder" ] or ESP.cache;
+					Parent = healthbar_enabled and objects[ "holder" ] or ESP.cache;
 					Name = "\0";
 					Position = dim2(0, -5, 0, -1);
 					BorderColor3 = rgb(0, 0, 0);
@@ -383,10 +431,10 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 			-- Distance ESP
 				objects[ "distance" ] = ESP:create( "TextLabel" , {
 					FontFace = fonts.main;
-					TextColor3 = ESP.flags["Distance_Color"].Color;
+					TextColor3 = ESP:get_color(player, "Distance_Color", rgb(255, 255, 255));
 					BorderColor3 = rgb(0, 0, 0);
 					Text = "127st";
-					Parent = ESP.flags[ "Distance" ] and objects[ "holder" ] or ESP.cache;
+					Parent = distance_enabled and objects[ "holder" ] or ESP.cache;
 					TextStrokeTransparency = 0;
 					Name = "\0";
 					Size = dim2(1, 0, 0, 0);
@@ -401,7 +449,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 			-- Weapon ESP
 				objects[ "weapon" ] = ESP:create( "TextLabel" , {
 					FontFace = fonts.main;
-					TextColor3 = ESP.flags["Weapon_Color"].Color;
+					TextColor3 = ESP:get_color(player, "Weapon_Color", rgb(255, 255, 255));
 					BorderColor3 = rgb(0, 0, 0);
 					Text = "[ak-47]";
 					Parent = ESP.cache;
@@ -519,10 +567,6 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 	
 	function ESP.refresh_elements( )
 		for _,v in players:GetPlayers() do 
-			if v == players.LocalPlayer then 
-				continue
-			end
-			
 			if not v.Character then 
 				continue 
 			end 
@@ -533,14 +577,26 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 			if not objects then 
 				continue 
 			end
-			objects.holder.Parent = ESP.flags["ESP_Enabled"] and ESP.screengui or ESP.cache
 
-			objects[ "name" ].Parent = ESP.flags["Names"] and objects["holder"] or ESP.cache
-			objects[ "name" ].TextColor3 = ESP.flags["Name_Color"].Color
+			local category = ESP:get_category(v)
+			local enabled = ESP:get_setting(v, "ESP_Enabled", true)
+			local names_enabled = ESP:get_setting(v, "Names", true)
+			local boxes_enabled = ESP:get_setting(v, "Boxes", true)
+			local box_type = ESP:get_setting(v, "Box_Type", "Corner")
+			local box_color = ESP:get_color(v, "Box_Color", rgb(255, 255, 255))
+			local skeletons_enabled = ESP:get_setting(v, "Skeletons", true)
+			local healthbar_enabled = ESP:get_setting(v, "Healthbar", true)
+			local weapon_enabled = ESP:get_setting(v, "Weapon", true)
+			local distance_enabled = ESP:get_setting(v, "Distance", true)
+
+			objects.holder.Parent = enabled and ESP.screengui or ESP.cache
+
+			objects[ "name" ].Parent = names_enabled and objects["holder"] or ESP.cache
+			objects[ "name" ].TextColor3 = ESP:get_color(v, "Name_Color", rgb(255, 255, 255))
 			
-			local is_corner = ESP.flags[ "Box_Type" ] == "Corner"
+			local is_corner = box_type == "Corner"
 
-			if ESP.flags["Boxes"] then 
+			if boxes_enabled then 
 				objects[ "corners" ].Parent = (is_corner and objects["holder"]) or ESP.cache
 				objects[ "box_handler" ].Parent = (is_corner and ESP.cache or objects[ "holder" ])
 				objects[ "box_outline" ].Parent = (is_corner and ESP.cache or objects[ "holder" ]) 
@@ -549,23 +605,23 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 				objects[ "box_handler" ].Parent = ESP.cache
 				objects[ "box_outline" ].Parent = ESP.cache
 			end 
-			objects[ "box_color" ].Color = ESP.flags["Box_Color"].Color 
+			objects[ "box_color" ].Color = box_color
 
 			for _, corner in objects[ "corners" ]:GetChildren() do
-				corner.Frame.BackgroundColor3 = ESP.flags["Box_Color"].Color
+				corner.Frame.BackgroundColor3 = box_color
 			end
 
 			for _, line in path.drawings do
-				line.Color = ESP.flags["Skeletons_Color"].Color
-				line.Visible = ESP.flags["Skeletons"] and ESP.flags["ESP_Enabled"]
+				line.Color = ESP:get_color(v, "Skeletons_Color", rgb(255, 255, 255))
+				line.Visible = skeletons_enabled and enabled
 			end
 
-			objects[ "healthbar_holder" ].Parent = ESP.flags[ "Healthbar" ] and objects[ "holder" ] or ESP.cache
-			objects[ "weapon" ].TextColor3 = ESP.flags["Weapon_Color"].Color
-			objects[ "weapon" ].Parent = ESP.flags["Weapon"] and v.Character:FindFirstChildOfClass("Tool") and objects[ "holder" ] or ESP.cache
+			objects[ "healthbar_holder" ].Parent = healthbar_enabled and objects[ "holder" ] or ESP.cache
+			objects[ "weapon" ].TextColor3 = ESP:get_color(v, "Weapon_Color", rgb(255, 255, 255))
+			objects[ "weapon" ].Parent = weapon_enabled and v.Character:FindFirstChildOfClass("Tool") and objects[ "holder" ] or ESP.cache
 
-			objects[ "distance" ].TextColor3 = ESP.flags["Distance_Color"].Color
-			objects[ "distance" ].Parent = ESP.flags["Distance"] and objects[ "holder" ] or ESP.cache
+			objects[ "distance" ].TextColor3 = ESP:get_color(v, "Distance_Color", rgb(255, 255, 255))
+			objects[ "distance" ].Parent = distance_enabled and objects[ "holder" ] or ESP.cache
 
 
 		end
@@ -585,6 +641,16 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 
 			local character = data.info.character
 			local humanoid = data.info.humanoid 
+			local category = ESP:get_category(player)
+			local enabled = ESP:get_setting(player, "ESP_Enabled", true)
+			
+			if not enabled then
+				local holder = data and data.objects and data.objects["holder"]
+				if holder then
+					holder.Parent = ESP.cache
+				end
+				continue
+			end
 			
 			if not (character or humanoid) then 
 				continue 
@@ -604,7 +670,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 			end 
 
 			-- Skeletons 
-			if ESP.flags["Skeletons"] and character:FindFirstChild("UpperTorso") then 
+			if ESP:get_setting(player, "Skeletons", true) and character:FindFirstChild("UpperTorso") then 
 				for i = 1, #bones do
 					local origin, destination = bones[i][1], bones[i][2]
 

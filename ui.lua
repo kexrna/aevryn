@@ -2004,6 +2004,42 @@
             end
 
 			local objects = cfg.objects; do 
+				local function get_preview_category()
+					local order = {"Enemies", "Team", "Local"}
+					for _, category in ipairs(order) do
+						if flags[category .. "ESP_Enabled"] == true then
+							return category
+						end
+					end
+					return "Enemies"
+				end
+
+				local function get_preview_flag(flag_name, fallback)
+					local category = get_preview_category()
+					local value = flags[category .. flag_name]
+					if value == nil then
+						value = flags[flag_name]
+					end
+					if value == nil then
+						return fallback
+					end
+					return value
+				end
+
+				local function get_preview_color(flag_name, fallback)
+					local value = get_preview_flag(flag_name, fallback)
+					if type(value) == "table" and value.Color then
+						return value.Color
+					end
+					if typeof(value) == "Color3" then
+						return value
+					end
+					if type(value) == "string" then
+						return Color3.fromHex(value)
+					end
+					return fallback
+				end
+
 				objects[ "holder" ] = library:create( "Frame" , {
 					Parent = items.viewportframe;
 					Name = "\0";
@@ -2024,7 +2060,7 @@
 				objects[ "name" ] = library:create( "TextLabel" , {
 					FontFace = library.font;
 					Parent = library.cache;
-					TextColor3 = flags["Name_Color"].Color;
+					TextColor3 = get_preview_color("Name_Color", rgb(255, 255, 255));
 					BorderColor3 = rgb(0, 0, 0);
 					Text = string.format("%s (@%s)", lp.DisplayName, lp.Name);
 					Name = "\0";
@@ -2101,7 +2137,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, -2);
 						BorderSizePixel = 0;
-						BackgroundColor3 = flags["Box_Color"].Color
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "2" ] = library:create( "Frame" , {
@@ -2120,7 +2156,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, 1);
 						BorderSizePixel = 0;
-						BackgroundColor3 = flags["Box_Color"].Color
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "3" ] = library:create( "Frame" , {
@@ -2140,7 +2176,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, -2);
 						BorderSizePixel = 0;
-						BackgroundColor3 = flags["Box_Color"].Color
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "4" ] = library:create( "Frame" , {
@@ -2160,7 +2196,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, 1);
 						BorderSizePixel = 0;
-						BackgroundColor3 = flags["Box_Color"].Color
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "5" ] = library:create( "Frame" , {
@@ -2180,7 +2216,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, -2);
 						BorderSizePixel = 0;
-						BackgroundColor3 = flags["Box_Color"].Color
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "6" ] = library:create( "Frame" , {
@@ -2201,7 +2237,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, 1);
 						BorderSizePixel = 0;
-						BackgroundColor3 = flags["Box_Color"].Color
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "7" ] = library:create( "Frame" , {
@@ -2221,7 +2257,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, -2);
 						BorderSizePixel = 0;
-						BackgroundColor3 = flags["Box_Color"].Color
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "7" ] = library:create( "Frame" , {
@@ -2242,7 +2278,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, 1);
 						BorderSizePixel = 0;
-						BackgroundColor3 = flags["Box_Color"].Color
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 				-- 
 				
@@ -2272,7 +2308,7 @@
 				-- Distance esp
 					objects[ "distance" ] = library:create( "TextLabel" , {
 						FontFace = library.font;
-						TextColor3 = flags["Distance_Color"].Color;
+						TextColor3 = get_preview_color("Distance_Color", rgb(255, 255, 255));
 						BorderColor3 = rgb(0, 0, 0);
 						Text = "127st";
 						Parent = library.cache;
@@ -2290,7 +2326,7 @@
 				-- Weapon esp
 					objects[ "weapon" ] = library:create( "TextLabel" , {
 						FontFace = library.font;
-						TextColor3 = flags["Weapon_Color"].Color;
+						TextColor3 = get_preview_color("Weapon_Color", rgb(255, 255, 255));
 						BorderColor3 = rgb(0, 0, 0);
 						Text = "[ Weapon ]";
 						Parent = library.cache;
@@ -2320,44 +2356,47 @@
 			end 
 
 			cfg.change_health = function()
-				if flags[ "healthbar_holder" ] and flags[ "healthbar_holder" ].Parent ~= objects[ "holder" ] then 
-					return 
+				local health_enabled = get_preview_flag("Healthbar", true)
+				if not health_enabled then
+					return
 				end
 
 				local humanoid = character.Humanoid
 				
 				local multiplier = humanoid.MaxHealth * math.abs(math.sin(tick() * 2)) / humanoid.MaxHealth
-				local color = flags[ "Health_Low" ].Color:Lerp( flags["Health_High"].Color, multiplier)
+				local low_color = get_preview_color("Health_Low", rgb(255, 0, 0))
+				local high_color = get_preview_color("Health_High", rgb(0, 255, 0))
+				local color = low_color:Lerp(high_color, multiplier)
 				
 				objects[ "healthbar" ].Size = UDim2.new(1, -2, multiplier, -2)
 				objects[ "healthbar" ].Position = UDim2.new(0, 1, 1 - multiplier, 1)
 				objects[ "healthbar" ].BackgroundColor3 = color
 			end -- wtf why diff func defining
 
-			function cfg.refresh_elements( )                                
-				objects.holder.Parent = flags["ESP_Enabled"] and items.viewportframe or library.cache
+			function cfg.refresh_elements( )
+				local esp_enabled = get_preview_flag("ESP_Enabled", true)
+				local names_enabled = get_preview_flag("Names", true)
+				local boxes_enabled = get_preview_flag("Boxes", true)
+				local box_type = get_preview_flag("Box_Type", "Corner")
+				local box_color = get_preview_color("Box_Color", rgb(255, 255, 255))
+				local skeletons_enabled = get_preview_flag("Skeletons", true)
+				local health_enabled = get_preview_flag("Healthbar", true)
+				local distance_enabled = get_preview_flag("Distance", true)
+				local weapon_enabled = get_preview_flag("Weapon", true)
 
-				local temp = {
-					["Names"] = objects["name"]; 
-					["Name_Color"] = {objects["name"]};
-					["Healthbar"] = objects[ "healthbar_holder" ];
-					["Distance"] = objects[ "distance" ];
-					["Weapon"] = objects[ "weapon" ];
-					["Distance_Color"] = {objects[ "distance" ]};
-					["Weapon_Color"] = {objects[ "weapon" ]};
-				}
+				objects.holder.Parent = esp_enabled and items.viewportframe or library.cache
 
-				for flag,object in temp do 
-					if type(object) == "table" then 
-						object[1].TextColor3 = flags[flag].Color
-					else 
-						object.Parent = flags[flag] and objects[ "holder" ] or library.cache
-					end
-				end 
+				objects["name"].Parent = names_enabled and objects["holder"] or library.cache
+				objects["name"].TextColor3 = get_preview_color("Name_Color", rgb(255, 255, 255))
+				objects["healthbar_holder"].Parent = health_enabled and objects["holder"] or library.cache
+				objects["distance"].TextColor3 = get_preview_color("Distance_Color", rgb(255, 255, 255))
+				objects["distance"].Parent = distance_enabled and objects["holder"] or library.cache
+				objects["weapon"].TextColor3 = get_preview_color("Weapon_Color", rgb(255, 255, 255))
+				objects["weapon"].Parent = weapon_enabled and objects["holder"] or library.cache
 				
-				local is_corner = flags[ "Box_Type" ] == "Corner"
+				local is_corner = box_type == "Corner"
 
-				if flags["Boxes"] then 
+				if boxes_enabled then 
 					if is_corner then 
 						objects[ "corners" ].Parent = objects["holder"]
 						objects[ "box_handler" ].Parent = library.cache
@@ -2373,34 +2412,33 @@
 					objects[ "box_outline" ].Parent = library.cache
 				end 
 
-				objects[ "box_color" ].Color = flags["Box_Color"].Color 
+				objects[ "box_color" ].Color = box_color
 
 				for _, corner in objects[ "corners" ]:GetChildren() do
-					corner.Frame.BackgroundColor3 = flags["Box_Color"].Color
+					corner.Frame.BackgroundColor3 = box_color
 				end
 
-                for i = 1, #bones do
-                    local bone = bones[i]
-                    local a = character:FindFirstChild(bone[1])
-                    local b = character:FindFirstChild(bone[2])
-                    local line = cfg.skeleton[i]
+				for i = 1, #bones do
+					local bone = bones[i]
+					local a = character:FindFirstChild(bone[1])
+					local b = character:FindFirstChild(bone[2])
+					local line = cfg.skeleton[i]
 
-                    if a and b and flags["Skeletons"] then
-                        local p0, ok0 = world_to_viewport(items.camera, a.Position)
-                        local p1, ok1 = world_to_viewport(items.camera, b.Position)
+					if a and b and skeletons_enabled and esp_enabled then
+						local p0, ok0 = world_to_viewport(items.camera, a.Position)
+						local p1, ok1 = world_to_viewport(items.camera, b.Position)
 
-                        if ok0 and ok1 then
-                            local diff = p1 - p0
-                            local len = diff.Magnitude
+						if ok0 and ok1 then
+							local diff = p1 - p0
+							local len = diff.Magnitude
 
-                            line.Size = UDim2.fromOffset(len, 1)
-                            line.Position = UDim2.fromOffset(
-                                (p0.X + p1.X) / 2,
-                                (p0.Y + p1.Y) / 2
-                            )
-                            line.Rotation = math.deg(math.atan2(diff.Y, diff.X))
-                            line.BackgroundColor3 = flags["Skeletons_Color"].Color
-                            line.Visible = true
+							line.Size = UDim2.fromOffset(len, 1)
+							line.Position = UDim2.fromOffset(
+								(p0.X + p1.X) / 2,
+								(p0.Y + p1.Y) / 2
+							)
+							line.Rotation = math.deg(math.atan2(diff.Y, diff.X))
+							line.BackgroundColor3 = get_preview_color("Skeletons_Color", rgb(255, 255, 255))
                         else
                             line.Visible = false
                         end
