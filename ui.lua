@@ -563,6 +563,41 @@
 			return ins 
 		end
 	-- 
+				local function get_preview_category()
+					local order = {"Enemies", "Team", "Local"}
+					for _, category in ipairs(order) do
+						if flags[category .. "ESP_Enabled"] == true then
+							return category
+						end
+					end
+					return "Enemies"
+				end
+
+				local function get_preview_flag(flag_name, fallback)
+					local category = get_preview_category()
+					local value = flags[category .. flag_name]
+					if value == nil then
+						value = flags[flag_name]
+					end
+					if value == nil then
+						return fallback
+					end
+					return value
+				end
+
+				local function get_preview_color(flag_name, fallback)
+					local value = get_preview_flag(flag_name, fallback)
+					if type(value) == "table" and value.Color then
+						return value.Color
+					end
+					if typeof(value) == "Color3" then
+						return value
+					end
+					if type(value) == "string" then
+						return Color3.fromHex(value)
+					end
+					return fallback
+				end
 
 	-- elements 
 		local tooltip_sgui = library:create("ScreenGui", {
@@ -2004,42 +2039,6 @@
             end
 
 			local objects = cfg.objects; do 
-				local function get_preview_category()
-					local order = {"Enemies", "Team", "Local"}
-					for _, category in ipairs(order) do
-						if flags[category .. "ESP_Enabled"] == true then
-							return category
-						end
-					end
-					return "Enemies"
-				end
-
-				local function get_preview_flag(flag_name, fallback)
-					local category = get_preview_category()
-					local value = flags[category .. flag_name]
-					if value == nil then
-						value = flags[flag_name]
-					end
-					if value == nil then
-						return fallback
-					end
-					return value
-				end
-
-				local function get_preview_color(flag_name, fallback)
-					local value = get_preview_flag(flag_name, fallback)
-					if type(value) == "table" and value.Color then
-						return value.Color
-					end
-					if typeof(value) == "Color3" then
-						return value
-					end
-					if type(value) == "string" then
-						return Color3.fromHex(value)
-					end
-					return fallback
-				end
-
 				objects[ "holder" ] = library:create( "Frame" , {
 					Parent = items.viewportframe;
 					Name = "\0";
