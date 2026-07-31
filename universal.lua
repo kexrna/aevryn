@@ -60,15 +60,10 @@ local Camera = Workspace.CurrentCamera
 local Mouse = Client:GetMouse()
 local CMouse = cloneref(Client:GetMouse())
 --
-local library, themes, ESP, Combat, Target, Sleep, ClientTool
+local Combat, Target, Sleep, ClientTool
 local Script = {Functions = {}, Friends = {}, Connections = {}, Cache = {}, BeizerManager = {}, BeizerCurve = {}, Desync = {}}
-if LPH_OBFUSCATED then
-	library, themes = loadstring(game:HttpGet())()
-	ESP = loadstring(game:HttpGet())()
-else
-	library, themes = loadstring(readfile("aevryn/libs/ui.lua"))()
-	ESP = loadstring(readfile("aevryn/libs/ESP lib.lua"))()   
-end
+local library, themes = loadstring(game:HttpGet("https://raw.githubusercontent.com/kexrna/aevryn/refs/heads/main/ui.lua"))()
+local ESP = loadstring(game:HttpGet("https://raw.githubusercontent.com/kexrna/aevryn/refs/heads/main/ESP%20lib.lua"))()
 local prison_life, hood_custom = game.PlaceId == 155615604, (game.PlaceId == 9825515356 or game.PlaceId == 138995385694035)
 local flags = library.flags
 ESP.flags = flags
@@ -595,21 +590,31 @@ do
 
 			local function update_elements() if esp and esp.refresh_elements then esp.refresh_elements() end; if ESP and ESP.refresh_elements then ESP.refresh_elements() end end 
 			local column = Visuals:column()
-			local section = column:section({name = "General", toggle = false})
-			section:toggle({name = "Enabled", flag = "ESP_Enabled", callback = update_elements})
-			section:toggle({name = "Names", flag = "Names", callback = function() end}):colorpicker({flag = "Name_Color", callback = update_elements})
-			local settings = section:toggle({name = "Boxes", flag = "Boxes", callback = update_elements})
-			section:dropdown({name = "Box Type", flag = "Box_Type", items = {"Corner", "Full"}, default = "Corner", callback = update_elements})
-			settings:colorpicker({name = "Box Color", flag = "Box_Color", callback = update_elements})
-			local Skeleton = section:toggle({name = "Skeleton", flag = "Skeletons", callback = update_elements})
-			Skeleton:colorpicker({name = "Skeletons Color", flag = "Skeletons_Color", callback = update_elements})
-			local toggle = section:toggle({name = "Healthbar", flag = "Healthbar", callback = update_elements})
-			toggle:colorpicker({name = "High HP Color", flag = "Health_High", callback = update_elements})
-			toggle:colorpicker({name = "Low HP Color", flag = "Health_Low", callback = update_elements})
-			section:toggle({name = "Distance", flag = "Distance", callback = update_elements})
-			:colorpicker({name = "Distance Color", flag = "Distance_Color", callback = update_elements})
-			section:toggle({name = "Weapon", flag = "Weapon", callback = update_elements})
-			:colorpicker({name = "Weapon Color", flag = "Weapon_Color", callback = update_elements})
+			local Enemies, Team, Local = column:multi_section({names = {"Enemies", "Team", "Local"}})
+            local sections = {
+                {name = "Enemies", section = Enemies},
+                {name = "Team", section = Team},
+                {name = "Local", section = Local},
+            }
+            for _, entry in ipairs(sections) do
+                local categorie = entry.name
+                local section = entry.section
+                section:toggle({name = "Enabled", flag = categorie ..  "ESP_Enabled", callback = update_elements})
+                section:toggle({name = "Names", flag = categorie ..  "Names", callback = function() end}):colorpicker({flag = categorie ..  "Name_Color", callback = update_elements})
+                local settings = section:toggle({name = "Boxes", flag = categorie ..  "Boxes", callback = update_elements})
+                section:dropdown({name = "Box Type", flag = categorie ..  "Box_Type", items = {"Corner", "Full"}, default = "Corner", callback = update_elements})
+                settings:colorpicker({name = "Box Color", flag = categorie ..  "Box_Color", callback = update_elements})
+                local Skeleton = section:toggle({name = "Skeleton", flag = categorie ..  "Skeletons", callback = update_elements})
+                Skeleton:colorpicker({name = "Skeletons Color", flag = categorie ..  "Skeletons_Color", callback = update_elements})
+                local toggle = section:toggle({name = "Healthbar", flag = categorie ..  "Healthbar", callback = update_elements})
+                toggle:colorpicker({name = "High HP Color", flag = categorie ..  "Health_High", callback = update_elements})
+                toggle:colorpicker({name = "Low HP Color", flag = categorie ..  "Health_Low", callback = update_elements})
+                section:toggle({name = "Distance", flag = categorie ..  "Distance", callback = update_elements})
+                :colorpicker({name = "Distance Color", flag = categorie ..  "Distance_Color", callback = update_elements})
+                section:toggle({name = "Weapon", flag = categorie ..  "Weapon", callback = update_elements})
+                :colorpicker({name = "Weapon Color", flag = categorie ..  "Weapon_Color", callback = update_elements})
+            end
+			
 			esp = window.esp_section:esp_preview({})
 
             local column2 = Visuals:column()
