@@ -2345,7 +2345,7 @@
                     line.Name = "SkeletonLine"
                     line.AnchorPoint = Vector2.new(0.5, 0.5)
                     line.BorderSizePixel = 0
-                    line.BackgroundColor3 = flags["Skeletons_Color"].Color
+                    line.BackgroundColor3 = get_preview_color("Skeletons_Color", rgb(255, 255, 255))
                     line.Visible = false
                     line.ZIndex = 10
                     line.Parent = objects.holder -- IMPORTANT
