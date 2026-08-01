@@ -1,6 +1,10 @@
 --[[ hi this has been made by kexrna]]
 
-
+--[[ to do: 
+    add configuration based on distance for both silent aim and aim assist fov, preds, smoothness, etc
+    making multi_section in esp to make it more customzation depending on players priority
+    more visuals( custom crosshair, fog, saturation, zoom key, fov customization, free cam, third person, )
+]]
 
 
 
@@ -890,7 +894,7 @@ Script.Functions.GetTarget = function(Settings)
         break
     end
     if ClosestTarget then
-        if ClosestTarget.Character.head.Position.Y - ClosestTarget.Character.HumanoidRootPart.Position.Y > 1.5 then
+        if ClosestTarget.Character.Head.Position.Y - ClosestTarget.Character.HumanoidRootPart.Position.Y > 1.5 then
             Script.Cache.CF = ClosestTarget.Character.HumanoidRootPart.Position
         else
             Script.Cache.CF = hitpos
@@ -1058,7 +1062,7 @@ do -- init
 					})
 				end
 			end
-			if Target and flags["aim_assist"] then
+			if Target and flags["aim_assist"] and Script.Cache.Valid_AimAssist then
                 if flags["tool_check"] and not ClientTool then Manager:StopCurrent() return end
 				local Char = Target.Character
 				if not Char then Manager:StopCurrent() return end
@@ -1077,8 +1081,7 @@ do -- init
 						end
 					end
 				end
-                --- idk why ts is complaining about this 
----@diagnostic disable-next-line: unused-local
+
 				local TargetCF = if flags["aim_assist_nearest_part"] and Script.Cache.CF then Script.Cache.CF else Char[flags["aim_assist_bone"]].Position
                 
                 if flags["aim_assist_prediction"] then
