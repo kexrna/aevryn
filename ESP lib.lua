@@ -232,7 +232,6 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 			});  
 			
 			-- Corner Boxes
-			local boxcolor = ESP:get_color(player, "Box_Color", rgb(255, 255, 255))
 				objects[ "corners" ] = ESP:create( "Frame" , {
 					Visible = true;
 					BorderColor3 = rgb(0, 0, 0);
@@ -261,7 +260,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 					BorderColor3 = rgb(0, 0, 0);
 					Size = dim2(1, -2, 1, -2);
 					BorderSizePixel = 0;
-					BackgroundColor3 = boxcolor
+					BackgroundColor3 = ESP.flags["Box_Color"].Color
 				});
 				
 				objects[ "2" ] = ESP:create( "Frame" , {
@@ -280,7 +279,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 					BorderColor3 = rgb(0, 0, 0);
 					Size = dim2(1, -2, 1, 1);
 					BorderSizePixel = 0;
-					BackgroundColor3 = boxcolor
+					BackgroundColor3 = ESP.flags["Box_Color"].Color
 				});
 				
 				objects[ "3" ] = ESP:create( "Frame" , {
@@ -300,7 +299,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 					BorderColor3 = rgb(0, 0, 0);
 					Size = dim2(1, -2, 1, -2);
 					BorderSizePixel = 0;
-					BackgroundColor3 = boxcolor
+					BackgroundColor3 = ESP.flags["Box_Color"].Color
 				});
 				
 				objects[ "4" ] = ESP:create( "Frame" , {
@@ -320,7 +319,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 					BorderColor3 = rgb(0, 0, 0);
 					Size = dim2(1, -2, 1, 1);
 					BorderSizePixel = 0;
-					BackgroundColor3 = boxcolor
+					BackgroundColor3 = ESP.flags["Box_Color"].Color
 				});
 				
 				objects[ "5" ] = ESP:create( "Frame" , {
@@ -340,7 +339,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 					BorderColor3 = rgb(0, 0, 0);
 					Size = dim2(1, -2, 1, -2);
 					BorderSizePixel = 0;
-					BackgroundColor3 = ESP:get_color(player, "Box_Color", rgb(255, 255, 255))
+					BackgroundColor3 = ESP.flags["Box_Color"].Color
 				});
 				
 				objects[ "6" ] = ESP:create( "Frame" , {
@@ -361,7 +360,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 					BorderColor3 = rgb(0, 0, 0);
 					Size = dim2(1, -2, 1, 1);
 					BorderSizePixel = 0;
-					BackgroundColor3 = boxcolor
+					BackgroundColor3 = ESP.flags["Box_Color"].Color
 				});
 				
 				objects[ "7" ] = ESP:create( "Frame" , {
@@ -381,7 +380,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 					BorderColor3 = rgb(0, 0, 0);
 					Size = dim2(1, -2, 1, -2);
 					BorderSizePixel = 0;
-					BackgroundColor3 = boxcolor
+					BackgroundColor3 = ESP.flags["Box_Color"].Color
 				});
 				
 				objects[ "7" ] = ESP:create( "Frame" , {
@@ -402,7 +401,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 					BorderColor3 = rgb(0, 0, 0);
 					Size = dim2(1, -2, 1, 1);
 					BorderSizePixel = 0;
-					BackgroundColor3 = boxcolor
+					BackgroundColor3 = ESP.flags["Box_Color"].Color
 				});
 			-- 
 			
@@ -466,10 +465,10 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 			-- 
 			
 			-- Skeleton Lines
-				local bonecolor = ESP:get_color(player, "Skeletons_Color", rgb(255, 255, 255));
+				
 				for _, bone in bones do
 					local line = Drawing.new("Line")
-					line.Color = bonecolor
+					line.Color = ESP.flags["Skeletons_Color"].Color;
 					line.Thickness = 1;
 					line.Visible = false;
 
@@ -488,7 +487,7 @@ local ESP = { players = {}, screengui = Instance.new("ScreenGui", gethui()), cac
 				local humanoid = data.info.humanoid
 				
 				local multiplier = value / humanoid.MaxHealth
-				local color = ESP:get_color(player, "Health_Low", rgb(255, 0, 0)):Lerp( ESP:get_color(player, "Health_High", rgb(0, 255, 0)), multiplier )
+				local color = ESP.flags[ "Health_Low" ].Color:Lerp( ESP.flags["Health_High"].Color, multiplier )
 				
 				objects[ "healthbar" ].Size = UDim2.new(1, -2, multiplier, -2)
 				objects[ "healthbar" ].Position = UDim2.new(0, 1, 1 - multiplier, 1)

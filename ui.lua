@@ -563,41 +563,6 @@
 			return ins 
 		end
 	-- 
-		function library:get_preview_category()
-			local order = {"Enemies", "Team", "Local"}
-			for _, category in ipairs(order) do
-				if flags[category .. "ESP_Enabled"] == true then
-					return category
-				end
-			end
-			return "Enemies"
-		end
-
-		function library:get_preview_flag(flag_name, fallback)
-			local category = library:get_preview_category()
-			local value = flags[category .. flag_name]
-			if value == nil then
-				value = flags[flag_name]
-			end
-			if value == nil then
-				return fallback
-			end
-			return value
-		end
-
-		function library:get_preview_color(flag_name, fallback)
-			local value = library:get_preview_flag(flag_name, fallback)
-			if type(value) == "table" and value.Color then
-				return value.Color
-			end
-			if typeof(value) == "Color3" then
-				return value
-			end
-			if type(value) == "string" then
-				return Color3.fromHex(value)
-			end
-			return fallback
-		end
 
 	-- elements 
 		local tooltip_sgui = library:create("ScreenGui", {
@@ -2039,6 +2004,42 @@
             end
 
 			local objects = cfg.objects; do 
+				local function get_preview_category()
+					local order = {"Enemies", "Team", "Local"}
+					for _, category in ipairs(order) do
+						if flags[category .. "ESP_Enabled"] == true then
+							return category
+						end
+					end
+					return "Enemies"
+				end
+
+				local function get_preview_flag(flag_name, fallback)
+					local category = get_preview_category()
+					local value = flags[category .. flag_name]
+					if value == nil then
+						value = flags[flag_name]
+					end
+					if value == nil then
+						return fallback
+					end
+					return value
+				end
+
+				local function get_preview_color(flag_name, fallback)
+					local value = get_preview_flag(flag_name, fallback)
+					if type(value) == "table" and value.Color then
+						return value.Color
+					end
+					if typeof(value) == "Color3" then
+						return value
+					end
+					if type(value) == "string" then
+						return Color3.fromHex(value)
+					end
+					return fallback
+				end
+
 				objects[ "holder" ] = library:create( "Frame" , {
 					Parent = items.viewportframe;
 					Name = "\0";
@@ -2059,7 +2060,7 @@
 				objects[ "name" ] = library:create( "TextLabel" , {
 					FontFace = library.font;
 					Parent = library.cache;
-					TextColor3 = library:get_preview_color("Name_Color", rgb(255, 255, 255));
+					TextColor3 = get_preview_color("Name_Color", rgb(255, 255, 255));
 					BorderColor3 = rgb(0, 0, 0);
 					Text = string.format("%s (@%s)", lp.DisplayName, lp.Name);
 					Name = "\0";
@@ -2136,7 +2137,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, -2);
 						BorderSizePixel = 0;
-						BackgroundColor3 = library:get_preview_color("Box_Color", rgb(255, 255, 255))
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "2" ] = library:create( "Frame" , {
@@ -2155,7 +2156,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, 1);
 						BorderSizePixel = 0;
-						BackgroundColor3 = library:get_preview_color("Box_Color", rgb(255, 255, 255))
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "3" ] = library:create( "Frame" , {
@@ -2175,7 +2176,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, -2);
 						BorderSizePixel = 0;
-						BackgroundColor3 = library:get_preview_color("Box_Color", rgb(255, 255, 255))
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "4" ] = library:create( "Frame" , {
@@ -2195,7 +2196,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, 1);
 						BorderSizePixel = 0;
-						BackgroundColor3 = library:get_preview_color("Box_Color", rgb(255, 255, 255))
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "5" ] = library:create( "Frame" , {
@@ -2215,7 +2216,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, -2);
 						BorderSizePixel = 0;
-						BackgroundColor3 = library:get_preview_color("Box_Color", rgb(255, 255, 255))
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "6" ] = library:create( "Frame" , {
@@ -2236,7 +2237,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, 1);
 						BorderSizePixel = 0;
-						BackgroundColor3 = library:get_preview_color("Box_Color", rgb(255, 255, 255))
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "7" ] = library:create( "Frame" , {
@@ -2256,7 +2257,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, -2);
 						BorderSizePixel = 0;
-						BackgroundColor3 = library:get_preview_color("Box_Color", rgb(255, 255, 255))
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 					
 					objects[ "7" ] = library:create( "Frame" , {
@@ -2277,7 +2278,7 @@
 						BorderColor3 = rgb(0, 0, 0);
 						Size = dim2(1, -2, 1, 1);
 						BorderSizePixel = 0;
-						BackgroundColor3 = library:get_preview_color("Box_Color", rgb(255, 255, 255))
+						BackgroundColor3 = get_preview_color("Box_Color", rgb(255, 255, 255))
 					});
 				-- 
 				
@@ -2307,7 +2308,7 @@
 				-- Distance esp
 					objects[ "distance" ] = library:create( "TextLabel" , {
 						FontFace = library.font;
-						TextColor3 = library:get_preview_color("Distance_Color", rgb(255, 255, 255));
+						TextColor3 = get_preview_color("Distance_Color", rgb(255, 255, 255));
 						BorderColor3 = rgb(0, 0, 0);
 						Text = "127st";
 						Parent = library.cache;
@@ -2325,7 +2326,7 @@
 				-- Weapon esp
 					objects[ "weapon" ] = library:create( "TextLabel" , {
 						FontFace = library.font;
-						TextColor3 = library:get_preview_color("Weapon_Color", rgb(255, 255, 255));
+						TextColor3 = get_preview_color("Weapon_Color", rgb(255, 255, 255));
 						BorderColor3 = rgb(0, 0, 0);
 						Text = "[ Weapon ]";
 						Parent = library.cache;
@@ -2344,7 +2345,7 @@
                     line.Name = "SkeletonLine"
                     line.AnchorPoint = Vector2.new(0.5, 0.5)
                     line.BorderSizePixel = 0
-                    line.BackgroundColor3 = library:get_preview_color("Skeletons_Color", rgb(255, 255, 255))
+                    line.BackgroundColor3 = flags["Skeletons_Color"].Color
                     line.Visible = false
                     line.ZIndex = 10
                     line.Parent = objects.holder -- IMPORTANT
@@ -2355,7 +2356,7 @@
 			end 
 
 			cfg.change_health = function()
-				local health_enabled = library:get_preview_flag("Healthbar", true)
+				local health_enabled = get_preview_flag("Healthbar", true)
 				if not health_enabled then
 					return
 				end
@@ -2363,8 +2364,8 @@
 				local humanoid = character.Humanoid
 				
 				local multiplier = humanoid.MaxHealth * math.abs(math.sin(tick() * 2)) / humanoid.MaxHealth
-				local low_color = library:get_preview_color("Health_Low", rgb(255, 0, 0))
-				local high_color = library:get_preview_color("Health_High", rgb(0, 255, 0))
+				local low_color = get_preview_color("Health_Low", rgb(255, 0, 0))
+				local high_color = get_preview_color("Health_High", rgb(0, 255, 0))
 				local color = low_color:Lerp(high_color, multiplier)
 				
 				objects[ "healthbar" ].Size = UDim2.new(1, -2, multiplier, -2)
@@ -2373,24 +2374,24 @@
 			end -- wtf why diff func defining
 
 			function cfg.refresh_elements( )
-				local esp_enabled = library:get_preview_flag("ESP_Enabled", true)
-				local names_enabled = library:get_preview_flag("Names", true)
-				local boxes_enabled = library:get_preview_flag("Boxes", true)
-				local box_type = library:get_preview_flag("Box_Type", "Corner")
-				local box_color = library:get_preview_color("Box_Color", rgb(255, 255, 255))
-				local skeletons_enabled = library:get_preview_flag("Skeletons", true)
-				local health_enabled = library:get_preview_flag("Healthbar", true)
-				local distance_enabled = library:get_preview_flag("Distance", true)
-				local weapon_enabled = library:get_preview_flag("Weapon", true)
+				local esp_enabled = get_preview_flag("ESP_Enabled", true)
+				local names_enabled = get_preview_flag("Names", true)
+				local boxes_enabled = get_preview_flag("Boxes", true)
+				local box_type = get_preview_flag("Box_Type", "Corner")
+				local box_color = get_preview_color("Box_Color", rgb(255, 255, 255))
+				local skeletons_enabled = get_preview_flag("Skeletons", true)
+				local health_enabled = get_preview_flag("Healthbar", true)
+				local distance_enabled = get_preview_flag("Distance", true)
+				local weapon_enabled = get_preview_flag("Weapon", true)
 
 				objects.holder.Parent = esp_enabled and items.viewportframe or library.cache
 
 				objects["name"].Parent = names_enabled and objects["holder"] or library.cache
-				objects["name"].TextColor3 = library:get_preview_color("Name_Color", rgb(255, 255, 255))
+				objects["name"].TextColor3 = get_preview_color("Name_Color", rgb(255, 255, 255))
 				objects["healthbar_holder"].Parent = health_enabled and objects["holder"] or library.cache
-				objects["distance"].TextColor3 = library:get_preview_color("Distance_Color", rgb(255, 255, 255))
+				objects["distance"].TextColor3 = get_preview_color("Distance_Color", rgb(255, 255, 255))
 				objects["distance"].Parent = distance_enabled and objects["holder"] or library.cache
-				objects["weapon"].TextColor3 = library:get_preview_color("Weapon_Color", rgb(255, 255, 255))
+				objects["weapon"].TextColor3 = get_preview_color("Weapon_Color", rgb(255, 255, 255))
 				objects["weapon"].Parent = weapon_enabled and objects["holder"] or library.cache
 				
 				local is_corner = box_type == "Corner"
@@ -2437,7 +2438,7 @@
 								(p0.Y + p1.Y) / 2
 							)
 							line.Rotation = math.deg(math.atan2(diff.Y, diff.X))
-							line.BackgroundColor3 = library:get_preview_color("Skeletons_Color", rgb(255, 255, 255))
+							line.BackgroundColor3 = get_preview_color("Skeletons_Color", rgb(255, 255, 255))
                         else
                             line.Visible = false
                         end
