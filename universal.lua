@@ -859,7 +859,9 @@ Script.Functions.GetTarget = function(Settings)
         table.insert(ValidTargets, {
             Player = v,
             Character = char,
-            Distance = distance
+            Distance = distance,
+            Valid_Silent = silentfov,
+            Valid_AimAssist = assistfov
         })
     end
     
@@ -875,7 +877,8 @@ Script.Functions.GetTarget = function(Settings)
                 if not Script.Functions.WallCheck(Closest, data.Character) then
                     continue  
                 end
-                distance = data.Distance
+                Script.Cache.Valid_Silent = data.Valid_Silent
+                Script.Cache.Valid_AimAssist = data.Valid_AimAssist
                 hitpos = Closest
             elseif flags["aim_assist"] and not Script.Functions.WallCheck(data.Player.Character[flags["aim_assist_bone"]].Position, data.Character) then
                 continue  
@@ -886,9 +889,14 @@ Script.Functions.GetTarget = function(Settings)
         ClosestTarget = data.Player
         break
     end
-    Script.Cache.Distance = distance
+    if ClosestTarget then
+        if ClosestTarget.Character.head.Position.Y - ClosestTarget.Character.HumanoidRootPart.Position.Y > 1.5 then
+            Script.Cache.CF = ClosestTarget.Character.HumanoidRootPart.Position
+        else
+            Script.Cache.CF = hitpos
+        end
+    end
 
-    Script.Cache.CF = hitpos
     LastTarget = ClosestTarget
     return ClosestTarget
 end
@@ -896,7 +904,7 @@ end
 Script.Functions.UpdateFov = (function()
     if flags["silent_fov"] then
         SilentFovCircle.Visible = true
-        if flags["silent_sticky_fov"] and Target and Target.Character then
+        if flags["silent_sticky_fov"] and Target and Script.Cache.Valid_Silent then
             local PartPos, OnScreen = Camera:WorldToViewportPoint(Target.Character.HumanoidRootPart.Position)
             if OnScreen then
                 SilentFovCircle.Position = Vector2.new(PartPos.X, PartPos.Y)      
@@ -915,7 +923,7 @@ Script.Functions.UpdateFov = (function()
 
     if flags["assist_fov"] then
         AimAssistFovCircle.Visible = true
-        if flags["assist_sticky_fov"] and Target and Target.Character then
+        if flags["assist_sticky_fov"] and Target and Script.Cache.Valid_AimAssist then
             local PartPos, OnScreen = Camera:WorldToViewportPoint(Target.Character.HumanoidRootPart.Position)
             if OnScreen then
                 AimAssistFovCircle.Position = Vector2.new(PartPos.X, PartPos.Y + GuiService:GetGuiInset().Y)
@@ -1208,7 +1216,7 @@ do -- init
 
     if prison_life then
         local old; old = hookfunction(filtergc("function", {Name = "castRay"}, true), (function(...)        
-            if not checkcaller() and flags["silent_aim"] and flags["silent_aim_method"] == "CastRay" and Target and Target.Character then
+            if not checkcaller() and flags["silent_aim"] and flags["silent_aim_method"] == "CastRay" and Script.Cache.Valid_Silent then
                 local TargetPos = Script.Cache.CF or Target.Character[flags.silent_aim_bone].Position
                 if flags["silent_aim_prediction"] then
                     TargetPos = TargetPos + Target.Character.HumanoidRootPart.Velocity * flags["silent_aim_prediction_amount"]
@@ -1222,7 +1230,7 @@ do -- init
         end))
     end
 	Script.Connections.RaycastHook = hookfunction(Workspace.Raycast, function(self, origin, direction, params)
-		if not checkcaller() and flags["silent_aim"] and flags["silent_aim_method"] == "Raycast Hook" and Target and Target.Character then
+		if not checkcaller() and flags["silent_aim"] and flags["silent_aim_method"] == "Raycast Hook" and Script.Cache.Valid_Silent then
 			local TargetPos = Script.Cache.CF or Target.Character[flags.silent_aim_bone].Position
 			if flags["silent_aim_prediction"] then
 				TargetPos = TargetPos + Target.Character.HumanoidRootPart.Velocity * flags["silent_aim_prediction_amount"]
