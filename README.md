@@ -2,3 +2,4 @@ releasing this for free cus i have too much going on to finish it, i know its no
 
 # setup
 just put ui.lua and ESP lib.lua in workspace\aevryn\libs (create these by ur self if needed it was not deseigned to be released as source)
+https://discord.gg/VSW8G5rYYh
